@@ -1,0 +1,219 @@
+@page "/"
+@using Microsoft.Extensions.Logging
+@using Soenneker.Blazor.Utils.Clipboard.Abstract
+@using Soenneker.Blazor.Utils.Clipboard.Dtos
+@using Soenneker.Blazor.Utils.Clipboard.Enums
+@inject IClipboardUtil Clipboard
+@inject ILogger<Index> Logger
+
+<div class="clipboard-demo-page">
+    <header class="demo-header">
+        <div class="demo-logo" aria-hidden="true">📋</div>
+        <h1 class="demo-title">Clipboard</h1>
+        <p class="demo-subtitle">Read, write, and inspect clipboard with permission detection and multiple MIME types</p>
+    </header>
+
+    <section class="demo-card">
+        <h2 class="demo-card-title">Permission state</h2>
+        <div class="permission-row">
+            <div class="permission-badges">
+                <span class="permission-badge @ReadPermissionClass" title="Clipboard read">Read: @_readPermission</span>
+                <span class="permission-badge @WritePermissionClass" title="Clipboard write">Write: @_writePermission</span>
+            </div>
+            <button type="button" class="demo-btn" @onclick="RefreshPermissionState" disabled="@_isBusy">Refresh</button>
+        </div>
+    </section>
+
+    <section class="demo-card">
+        <h2 class="demo-card-title">Plain text</h2>
+        <div class="demo-form-row">
+            <label class="demo-label" for="text-input">Copy</label>
+            <input id="text-input" class="demo-input" @bind="_textToWrite" placeholder="Type something…" />
+            <button type="button" class="demo-btn demo-btn-primary" @onclick="WriteToClipboard" disabled="@_isBusy">Write text</button>
+        </div>
+        <div class="demo-form-row">
+            <label class="demo-label">Paste</label>
+            <button type="button" class="demo-btn" @onclick="ReadFromClipboard" disabled="@_isBusy">Read text</button>
+            <button type="button" class="demo-btn" @onclick="ClearClipboard" disabled="@_isBusy" title="Clear clipboard">Clear</button>
+        </div>
+        @if (!string.IsNullOrEmpty(_readResult))
+        {
+            <div class="demo-result">@_readResult</div>
+        }
+    </section>
+
+    <section class="demo-card">
+        <h2 class="demo-card-title">All MIME types</h2>
+        <p style="margin: 0 0 1rem; font-size: 0.875rem; color: var(--text-muted);">Read text/plain, text/html, images, and other formats from the clipboard.</p>
+        <button type="button" class="demo-btn demo-btn-primary" @onclick="ReadAllTypes" disabled="@_isBusy">Read clipboard (all types)</button>
+        @if (_readItems?.Count > 0)
+        {
+            <div class="clipboard-items">
+                @foreach (ClipboardItemDto item in _readItems)
+                {
+                    <div class="clipboard-item">
+                        @foreach (KeyValuePair<string, string> kv in item.Types)
+                        {
+                            string value = kv.Value;
+                            string preview = value.Length > 120 ? value.Substring(0, 120) + "…" : value;
+                            <div class="clipboard-item-type">@kv.Key</div>
+                            @if (value.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <div class="clipboard-item-value"><img src="@value" alt="Pasted image" /></div>
+                            }
+                            else
+                            {
+                                <div class="clipboard-item-value">@preview</div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="demo-message @MessageClass">@_message</div>
+    }
+</div>
+
+@code {
+    private string _textToWrite = "";
+    private string _readResult = "";
+    private string _message = "";
+    private string _readPermission = "—";
+    private string _writePermission = "—";
+    private IReadOnlyList<ClipboardItemDto>? _readItems;
+    private bool _isBusy;
+    private bool _messageIsError;
+
+    private string ReadPermissionClass => _readPermission.ToLowerInvariant();
+    private string WritePermissionClass => _writePermission.ToLowerInvariant();
+    private string MessageClass => _messageIsError ? "error" : "success";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshPermissionState();
+    }
+
+    private async Task RefreshPermissionState()
+    {
+        _isBusy = true;
+        _message = "";
+        try
+        {
+            ClipboardPermissionState read = await Clipboard.GetReadPermissionState();
+            ClipboardPermissionState write = await Clipboard.GetWritePermissionState();
+            _readPermission = read.ToString();
+            _writePermission = write.ToString();
+        }
+        catch (Exception ex)
+        {
+            _message = $"Permission check: {ex.Message}";
+            _messageIsError = true;
+            Logger.LogWarning(ex, "Permission state failed");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task WriteToClipboard()
+    {
+        _isBusy = true;
+        _message = "";
+        _messageIsError = false;
+        try
+        {
+            await Clipboard.WriteText(_textToWrite);
+            _message = "Copied to clipboard.";
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _messageIsError = true;
+            Logger.LogWarning(ex, "Write to clipboard failed");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task ReadFromClipboard()
+    {
+        _isBusy = true;
+        _readResult = "";
+        _readItems = null;
+        _message = "";
+        _messageIsError = false;
+        try
+        {
+            _readResult = await Clipboard.ReadText();
+            _message = string.IsNullOrEmpty(_readResult) ? "Clipboard is empty or read permission not granted." : "Read successful.";
+            if (string.IsNullOrEmpty(_readResult))
+                _messageIsError = true;
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _messageIsError = true;
+            Logger.LogWarning(ex, "Read from clipboard failed");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task ClearClipboard()
+    {
+        _isBusy = true;
+        _message = "";
+        _messageIsError = false;
+        try
+        {
+            await Clipboard.Clear();
+            _readResult = "";
+            _readItems = null;
+            _message = "Clipboard cleared.";
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _messageIsError = true;
+            Logger.LogWarning(ex, "Clear clipboard failed");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task ReadAllTypes()
+    {
+        _isBusy = true;
+        _readItems = null;
+        _message = "";
+        _messageIsError = false;
+        try
+        {
+            _readItems = await Clipboard.Read();
+            _message = _readItems.Count == 0 ? "No items or read permission not granted." : $"Read {_readItems.Count} item(s).";
+            if (_readItems.Count == 0)
+                _messageIsError = true;
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _messageIsError = true;
+            Logger.LogWarning(ex, "Read all types failed");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}
