@@ -6,77 +6,90 @@
 @inject IClipboardUtil Clipboard
 @inject ILogger<Index> Logger
 
-<div class="clipboard-demo-page">
-    <header class="demo-header">
-        <div class="demo-logo" aria-hidden="true">📋</div>
-        <h1 class="demo-title">Clipboard</h1>
-        <p class="demo-subtitle">Read, write, and inspect clipboard with permission detection and multiple MIME types</p>
-    </header>
+<Div Space="Space.Y.Is6">
+    <DemoPanel Title="Permission state" Description="Clipboard read/write permission from the browser.">
+        <DemoButtonRow>
+            <Span Class="@PermissionBadgeClass(_readPermission)">Read: @_readPermission</Span>
+            <Span Class="@PermissionBadgeClass(_writePermission)">Write: @_writePermission</Span>
+            <Button OnClick="RefreshPermissionState" Disabled="@_isBusy">Refresh</Button>
+        </DemoButtonRow>
+    </DemoPanel>
 
-    <section class="demo-card">
-        <h2 class="demo-card-title">Permission state</h2>
-        <div class="permission-row">
-            <div class="permission-badges">
-                <span class="permission-badge @ReadPermissionClass" title="Clipboard read">Read: @_readPermission</span>
-                <span class="permission-badge @WritePermissionClass" title="Clipboard write">Write: @_writePermission</span>
-            </div>
-            <button type="button" class="demo-btn" @onclick="RefreshPermissionState" disabled="@_isBusy">Refresh</button>
-        </div>
-    </section>
-
-    <section class="demo-card">
-        <h2 class="demo-card-title">Plain text</h2>
-        <div class="demo-form-row">
-            <label class="demo-label" for="text-input">Copy</label>
-            <input id="text-input" class="demo-input" @bind="_textToWrite" placeholder="Type something…" />
-            <button type="button" class="demo-btn demo-btn-primary" @onclick="WriteToClipboard" disabled="@_isBusy">Write text</button>
-        </div>
-        <div class="demo-form-row">
-            <label class="demo-label">Paste</label>
-            <button type="button" class="demo-btn" @onclick="ReadFromClipboard" disabled="@_isBusy">Read text</button>
-            <button type="button" class="demo-btn" @onclick="ClearClipboard" disabled="@_isBusy" title="Clear clipboard">Clear</button>
-        </div>
+    <DemoPanel Title="Plain text" Description="Copy and paste plain text.">
+        <Field>
+            <FieldLabel For="text-input">Copy</FieldLabel>
+            <FieldBody>
+                <Input Id="text-input" @bind-Value="_textToWrite" Placeholder="Type something…" />
+            </FieldBody>
+        </Field>
+        <DemoButtonRow>
+            <Button OnClick="WriteToClipboard" Disabled="@_isBusy">Write text</Button>
+            <Button OnClick="ReadFromClipboard" Disabled="@_isBusy" Variant="ButtonVariant.Secondary">Read text</Button>
+            <Button OnClick="ClearClipboard" Disabled="@_isBusy" Variant="ButtonVariant.Outline">Clear</Button>
+        </DemoButtonRow>
         @if (!string.IsNullOrEmpty(_readResult))
         {
-            <div class="demo-result">@_readResult</div>
+            <Div Rounded="Rounded.Md"
+                 Border="Border.Is1"
+                 BorderColor="BorderColor.Border"
+                 BackgroundColor="BackgroundColor.Muted"
+                 Padding="Padding.Is4"
+                 TextSize="TextSize.Sm">
+                @_readResult
+            </Div>
         }
-    </section>
+    </DemoPanel>
 
-    <section class="demo-card">
-        <h2 class="demo-card-title">All MIME types</h2>
-        <p style="margin: 0 0 1rem; font-size: 0.875rem; color: var(--text-muted);">Read text/plain, text/html, images, and other formats from the clipboard.</p>
-        <button type="button" class="demo-btn demo-btn-primary" @onclick="ReadAllTypes" disabled="@_isBusy">Read clipboard (all types)</button>
+    <DemoPanel Title="All MIME types" Description="Read text, HTML, images, and other formats from the clipboard.">
+        <Button OnClick="ReadAllTypes" Disabled="@_isBusy">Read clipboard (all types)</Button>
         @if (_readItems?.Count > 0)
         {
-            <div class="clipboard-items">
+            <Div Space="Space.Y.Is4">
                 @foreach (ClipboardItemDto item in _readItems)
                 {
-                    <div class="clipboard-item">
+                    <Div Rounded="Rounded.Md"
+                         Border="Border.Is1"
+                         BorderColor="BorderColor.Border"
+                         Padding="Padding.Is4"
+                         Space="Space.Y.Is2">
                         @foreach (KeyValuePair<string, string> kv in item.Types)
                         {
                             string value = kv.Value;
                             string preview = value.Length > 120 ? value.Substring(0, 120) + "…" : value;
-                            <div class="clipboard-item-type">@kv.Key</div>
+                            <Paragraph Margin="Margin.Is0" TextSize="TextSize.Xs" TextColor="TextColor.Primary">@kv.Key</Paragraph>
                             @if (value.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
                             {
-                                <div class="clipboard-item-value"><img src="@value" alt="Pasted image" /></div>
+                                <img src="@value" alt="Pasted image" class="clipboard-preview-img" />
                             }
                             else
                             {
-                                <div class="clipboard-item-value">@preview</div>
+                                <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" Class="break-all whitespace-pre-wrap">@preview</Paragraph>
                             }
                         }
-                    </div>
+                    </Div>
                 }
-            </div>
+            </Div>
         }
-    </section>
+    </DemoPanel>
 
     @if (!string.IsNullOrEmpty(_message))
     {
-        <div class="demo-message @MessageClass">@_message</div>
+        @if (_messageIsError)
+        {
+            <Alert Variant="AlertVariant.Danger">
+                <AlertMessage>Notice</AlertMessage>
+                <AlertDescription>@_message</AlertDescription>
+            </Alert>
+        }
+        else
+        {
+            <Alert Variant="AlertVariant.Info">
+                <AlertMessage>Notice</AlertMessage>
+                <AlertDescription>@_message</AlertDescription>
+            </Alert>
+        }
     }
-</div>
+</Div>
 
 @code {
     private string _textToWrite = "";
@@ -88,9 +101,14 @@
     private bool _isBusy;
     private bool _messageIsError;
 
-    private string ReadPermissionClass => _readPermission.ToLowerInvariant();
-    private string WritePermissionClass => _writePermission.ToLowerInvariant();
-    private string MessageClass => _messageIsError ? "error" : "success";
+    private static string PermissionBadgeClass(string state) =>
+        $"inline-flex rounded-full border px-3 py-1 text-xs font-mono {state.ToLowerInvariant() switch
+        {
+            "granted" => "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400",
+            "denied" => "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400",
+            "prompt" => "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+            _ => "border-border bg-muted text-muted-foreground"
+        }}";
 
     protected override async Task OnInitializedAsync()
     {
