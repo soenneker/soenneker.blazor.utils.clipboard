@@ -2,11 +2,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
-using Soenneker.Asyncs.Initializers;
 using Soenneker.Blazor.Utils.Clipboard.Abstract;
 using Soenneker.Blazor.Utils.Clipboard.Dtos;
 using Soenneker.Blazor.Utils.Clipboard.Enums;
-using Soenneker.Blazor.Utils.ResourceLoader.Abstract;
+using Soenneker.Blazor.Utils.ModuleImport.Abstract;
 using Soenneker.Extensions.CancellationTokens;
 using Soenneker.Utils.CancellationScopes;
 
@@ -15,43 +14,19 @@ namespace Soenneker.Blazor.Utils.Clipboard;
 /// <inheritdoc cref="IClipboardInterop"/>
 public sealed class ClipboardInterop : IClipboardInterop
 {
-    private const string _modulePath = "Soenneker.Blazor.Utils.Clipboard/js/clipboardinterop.js";
-    private const string _jsHasClipboard = "ClipboardInterop.hasClipboard";
-    private const string _jsGetReadPermissionState = "ClipboardInterop.getReadPermissionState";
-    private const string _jsGetWritePermissionState = "ClipboardInterop.getWritePermissionState";
-    private const string _jsReadText = "ClipboardInterop.readText";
-    private const string _jsWriteText = "ClipboardInterop.writeText";
-    private const string _jsRead = "ClipboardInterop.read";
-    private const string _jsWrite = "ClipboardInterop.write";
+    private const string _modulePath = "/_content/Soenneker.Blazor.Utils.Clipboard/js/clipboardinterop.js";
 
-    private readonly IJSRuntime _jsRuntime;
-    private readonly IResourceLoader _resourceLoader;
-    private readonly AsyncInitializer _initializer;
+    private readonly IModuleImportUtil _moduleImportUtil;
     private readonly CancellationScope _cancellationScope = new();
 
     private bool? _hasClipboardCache;
 
-    public ClipboardInterop(IJSRuntime jsRuntime, IResourceLoader resourceLoader)
+    public ClipboardInterop(IModuleImportUtil moduleImportUtil)
     {
-        _jsRuntime = jsRuntime;
-        _resourceLoader = resourceLoader;
-        _initializer = new AsyncInitializer(Initialize);
+        _moduleImportUtil = moduleImportUtil;
     }
 
-    private async ValueTask Initialize(CancellationToken token)
-    {
-        _ = await _resourceLoader.ImportModule(_modulePath, token);
-    }
-
-    private async ValueTask EnsureInitialized(CancellationToken cancellationToken)
-    {
-        CancellationToken linked = _cancellationScope.CancellationToken.Link(cancellationToken, out CancellationTokenSource? source);
-
-        using (source)
-            await _initializer.Init(linked);
-    }
-
-    private static ClipboardPermissionState ParsePermissionState(string state)
+    private static ClipboardPermissionState ParsePermissionState(string? state)
     {
         return state switch
         {
@@ -73,8 +48,9 @@ public sealed class ClipboardInterop : IClipboardInterop
         {
             try
             {
-                await EnsureInitialized(linked);
-                var result = await _jsRuntime.InvokeAsync<bool>(_jsHasClipboard, linked);
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                var result = await module.InvokeAsync<bool>("hasClipboard", linked);
+
                 _hasClipboardCache = result;
                 return result;
             }
@@ -92,8 +68,9 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            await EnsureInitialized(linked);
-            var state = await _jsRuntime.InvokeAsync<string>(_jsGetReadPermissionState, linked);
+            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+            var state = await module.InvokeAsync<string>("getReadPermissionState", linked);
+
             return ParsePermissionState(state);
         }
     }
@@ -104,8 +81,9 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            await EnsureInitialized(linked);
-            var state = await _jsRuntime.InvokeAsync<string>(_jsGetWritePermissionState, linked);
+            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+            var state = await module.InvokeAsync<string>("getWritePermissionState", linked);
+
             return ParsePermissionState(state);
         }
     }
@@ -116,8 +94,8 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            await EnsureInitialized(linked);
-            return await _jsRuntime.InvokeAsync<string>(_jsReadText, linked);
+            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+            return await module.InvokeAsync<string>("readText", linked);
         }
     }
 
@@ -127,8 +105,8 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            await EnsureInitialized(linked);
-            await _jsRuntime.InvokeVoidAsync(_jsWriteText, linked, text ?? "");
+            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+            await module.InvokeVoidAsync("writeText", linked, text ?? "");
         }
     }
 
@@ -138,8 +116,9 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            await EnsureInitialized(linked);
-            var list = await _jsRuntime.InvokeAsync<List<ClipboardItemDto>>(_jsRead, linked);
+            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+            var list = await module.InvokeAsync<List<ClipboardItemDto>>("read", linked);
+
             return list ?? [];
         }
     }
@@ -150,20 +129,19 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            await EnsureInitialized(linked);
-            await _jsRuntime.InvokeVoidAsync(_jsWrite, linked, items);
+            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+            await module.InvokeVoidAsync("write", linked, items);
         }
     }
 
-    public async ValueTask Clear(CancellationToken cancellationToken = default)
+    public ValueTask Clear(CancellationToken cancellationToken = default)
     {
-        await WriteText("", cancellationToken);
+        return WriteText("", cancellationToken);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _resourceLoader.DisposeModule(_modulePath);
-        await _initializer.DisposeAsync();
+        await _moduleImportUtil.DisposeContentModule(_modulePath);
         await _cancellationScope.DisposeAsync();
     }
 }
