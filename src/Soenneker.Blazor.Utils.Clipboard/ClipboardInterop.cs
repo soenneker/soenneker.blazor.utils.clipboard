@@ -14,7 +14,7 @@ namespace Soenneker.Blazor.Utils.Clipboard;
 /// <inheritdoc cref="IClipboardInterop"/>
 public sealed class ClipboardInterop : IClipboardInterop
 {
-    private const string _modulePath = "/_content/Soenneker.Blazor.Utils.Clipboard/js/clipboardinterop.js";
+    private const string _modulePath = "_content/Soenneker.Blazor.Utils.Clipboard/js/clipboardinterop.js";
 
     private readonly IModuleImportUtil _moduleImportUtil;
     private readonly CancellationScope _cancellationScope = new();
