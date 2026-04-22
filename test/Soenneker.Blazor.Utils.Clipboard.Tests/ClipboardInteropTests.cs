@@ -1,26 +1,25 @@
 using Soenneker.Blazor.Utils.Clipboard.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Blazor.Utils.Clipboard.Tests;
 
-[Collection("Collection")]
-public sealed class ClipboardInteropTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class ClipboardInteropTests : HostedUnitTest
 {
     private readonly IClipboardInterop _clipboardInterop;
 
-    public ClipboardInteropTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public ClipboardInteropTests(Host host) : base(host)
     {
         _clipboardInterop = Resolve<IClipboardInterop>(true);
     }
 
-    [Fact]
+    [Test]
     public void Resolves_IClipboardInterop()
     {
         Assert.NotNull(_clipboardInterop);
     }
 
-    [Fact]
+    [Test]
     public void Resolves_IClipboardUtil()
     {
         var util = Resolve<IClipboardUtil>(true);
