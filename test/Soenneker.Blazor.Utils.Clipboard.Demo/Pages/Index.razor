@@ -76,14 +76,14 @@
     {
         @if (_messageIsError)
         {
-            <Alert Variant="AlertVariant.Danger">
+            <Alert Variant="AlertVariant.Destructive">
                 <AlertMessage>Notice</AlertMessage>
                 <AlertDescription>@_message</AlertDescription>
             </Alert>
         }
         else
         {
-            <Alert Variant="AlertVariant.Info">
+            <Alert Variant="AlertVariant.Default">
                 <AlertMessage>Notice</AlertMessage>
                 <AlertDescription>@_message</AlertDescription>
             </Alert>

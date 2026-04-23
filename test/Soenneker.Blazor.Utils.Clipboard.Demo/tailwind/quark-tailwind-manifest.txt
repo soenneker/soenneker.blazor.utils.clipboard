@@ -2,17 +2,14 @@
 # Do not edit manually. Class names for Tailwind @source to scan.
 bg-muted
 bg-primary
-border-1
-border-b-1
+border
+border-b
 border-border
 flex
-flex-wrap
 font-medium
 font-semibold
 gap-3
 inline-flex
-items-center
-justify-between
 m-0
 p-4
 pb-4
