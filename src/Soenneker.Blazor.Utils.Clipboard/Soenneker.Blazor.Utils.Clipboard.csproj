@@ -42,7 +42,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.7" />
-        <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="4.0.1796" />
+        <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="4.0.1801" />
         <PackageReference Include="Soenneker.Utils.AsyncSingleton" Version="4.0.783" />
     </ItemGroup>
 </Project>
