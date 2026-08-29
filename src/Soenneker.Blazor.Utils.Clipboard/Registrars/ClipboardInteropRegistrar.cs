@@ -14,6 +14,8 @@ public static class ClipboardInteropRegistrar
     /// Adds <see cref="IClipboardInterop"/> and <see cref="IClipboardUtil"/> as scoped services.
     /// Registers <see cref="Soenneker.Blazor.Utils.ModuleImport.Abstract.IModuleImportUtil"/> as scoped when needed.
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddClipboardAsScoped(this IServiceCollection services)
     {
         services.AddModuleImportUtilAsScoped()

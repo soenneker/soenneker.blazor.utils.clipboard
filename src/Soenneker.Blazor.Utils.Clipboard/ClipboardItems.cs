@@ -11,6 +11,8 @@ public static class ClipboardItems
     /// <summary>
     /// Creates a single item with text/plain only.
     /// </summary>
+    /// <param name="plainText">Plain text to encrypt, hash, or compare.</param>
+    /// <returns>The newly created clipboard Item Dto.</returns>
     public static ClipboardItemDto CreateText(string plainText)
     {
         return new ClipboardItemDto
@@ -24,6 +26,7 @@ public static class ClipboardItems
     /// </summary>
     /// <param name="plainText">Plain text fallback; required.</param>
     /// <param name="html">HTML content; if null, only text/plain is included.</param>
+    /// <returns>The newly created clipboard Item Dto.</returns>
     public static ClipboardItemDto CreatePlainAndHtml(string plainText, string? html = null)
     {
         var types = new Dictionary<string, string> { ["text/plain"] = plainText ?? "" };
@@ -37,6 +40,7 @@ public static class ClipboardItems
     /// </summary>
     /// <param name="dataUrl">Image as data URL.</param>
     /// <param name="mimeType">MIME type, e.g. image/png; defaults to image/png if not inferred from data URL.</param>
+    /// <returns>The newly created clipboard Item Dto.</returns>
     public static ClipboardItemDto CreateImage(string dataUrl, string mimeType = "image/png")
     {
         return new ClipboardItemDto
