@@ -11,7 +11,7 @@ public static class ClipboardItems
     /// <summary>
     /// Creates a single item with text/plain only.
     /// </summary>
-    /// <param name="plainText">Plain text to encrypt, hash, or compare.</param>
+    /// <param name="plainText">The text to place on the clipboard.</param>
     /// <returns>The newly created clipboard Item Dto.</returns>
     public static ClipboardItemDto CreateText(string plainText)
     {
@@ -24,8 +24,8 @@ public static class ClipboardItems
     /// <summary>
     /// Creates a single item with text/plain and optionally text/html (e.g. for pasting into rich editors).
     /// </summary>
-    /// <param name="plainText">Plain text fallback; required.</param>
-    /// <param name="html">HTML content; if null, only text/plain is included.</param>
+    /// <param name="plainText">The plain-text representation used by destinations that do not accept HTML.</param>
+    /// <param name="html">The HTML representation, or <see langword="null"/> to include only plain text.</param>
     /// <returns>The newly created clipboard Item Dto.</returns>
     public static ClipboardItemDto CreatePlainAndHtml(string plainText, string? html = null)
     {

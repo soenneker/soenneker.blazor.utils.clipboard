@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +37,10 @@ public sealed class ClipboardUtil : IClipboardUtil
             string text = await _clipboardInterop.ReadText(cancellationToken);
             return (true, text);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch
         {
             return (false, null);
@@ -51,6 +56,10 @@ public sealed class ClipboardUtil : IClipboardUtil
         {
             await _clipboardInterop.WriteText(text, cancellationToken);
             return true;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch
         {
@@ -68,7 +77,10 @@ public sealed class ClipboardUtil : IClipboardUtil
         => _clipboardInterop.Read(cancellationToken);
 
     public ValueTask Write(IEnumerable<ClipboardItemDto> items, CancellationToken cancellationToken = default)
-        => _clipboardInterop.Write(items, cancellationToken);
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        return _clipboardInterop.Write(items, cancellationToken);
+    }
 
     public ValueTask Clear(CancellationToken cancellationToken = default)
         => _clipboardInterop.Clear(cancellationToken);

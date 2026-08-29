@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,10 @@ public sealed class ClipboardInterop : IClipboardInterop
 
                 _hasClipboardCache = result;
                 return result;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch
             {
@@ -125,6 +130,8 @@ public sealed class ClipboardInterop : IClipboardInterop
 
     public async ValueTask Write(IEnumerable<ClipboardItemDto> items, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(items);
+
         CancellationToken linked = _cancellationScope.CancellationToken.Link(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
@@ -145,7 +152,7 @@ public sealed class ClipboardInterop : IClipboardInterop
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask DisposeAsync()
     {
-        await _moduleImportUtil.DisposeContentModule(_modulePath);
         await _cancellationScope.DisposeAsync();
+        await _moduleImportUtil.DisposeContentModule(_modulePath);
     }
 }

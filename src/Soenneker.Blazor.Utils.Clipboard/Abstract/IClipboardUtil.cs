@@ -40,7 +40,7 @@ public interface IClipboardUtil
     ValueTask<string> ReadText(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Attempts to read plain text from the clipboard. Returns (true, text) on success or (false, null) on permission denied or error.
+    /// Attempts to read plain text from the clipboard without surfacing browser or interop failures. Cancellation is still propagated.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task whose result is the requested (bool Success, string Text).</returns>
@@ -49,15 +49,15 @@ public interface IClipboardUtil
     /// <summary>
     /// Writes plain text to the clipboard.
     /// </summary>
-    /// <param name="text">Text to read, write, or transform.</param>
+    /// <param name="text">The text to place on the clipboard. A null value writes an empty string.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the write text operation is complete.</returns>
     ValueTask WriteText(string? text, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Attempts to write plain text to the clipboard. Returns true on success, false on permission denied or error.
+    /// Attempts to write plain text to the clipboard without surfacing browser or interop failures. Cancellation is still propagated.
     /// </summary>
-    /// <param name="text">Text to read, write, or transform.</param>
+    /// <param name="text">The text to place on the clipboard. A null value writes an empty string.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>true if the requested update was applied; otherwise, false.</returns>
     ValueTask<bool> TryWriteText(string? text, CancellationToken cancellationToken = default);
@@ -65,7 +65,7 @@ public interface IClipboardUtil
     /// <summary>
     /// Copies the given text to the clipboard (alias for <see cref="WriteText"/>).
     /// </summary>
-    /// <param name="text">Text to read, write, or transform.</param>
+    /// <param name="text">The text to place on the clipboard. A null value writes an empty string.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the copy text operation is complete.</returns>
     ValueTask CopyText(string? text, CancellationToken cancellationToken = default);
@@ -73,8 +73,8 @@ public interface IClipboardUtil
     /// <summary>
     /// Writes plain and optional HTML to the clipboard as a single item (e.g. for pasting into rich editors).
     /// </summary>
-    /// <param name="plainText">Plain text to encrypt, hash, or compare.</param>
-    /// <param name="html">Rendered page HTML to inspect.</param>
+    /// <param name="plainText">The plain-text representation used by destinations that do not accept HTML.</param>
+    /// <param name="html">The HTML representation, or <see langword="null"/> to include only plain text.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the copy plain and html operation is complete.</returns>
     ValueTask CopyPlainAndHtml(string plainText, string? html = null, CancellationToken cancellationToken = default);
@@ -89,7 +89,7 @@ public interface IClipboardUtil
     /// <summary>
     /// Writes one or more clipboard items with multiple MIME types (e.g. text/plain + text/html, or image/png as data URL).
     /// </summary>
-    /// <param name="items">items to inspect or update.</param>
+    /// <param name="items">The clipboard items to write. Text values are raw strings; binary values are data URLs.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the write operation is complete.</returns>
     ValueTask Write(IEnumerable<ClipboardItemDto> items, CancellationToken cancellationToken = default);

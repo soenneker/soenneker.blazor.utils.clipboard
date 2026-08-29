@@ -43,7 +43,7 @@ public interface IClipboardInterop : IAsyncDisposable
     /// <summary>
     /// Writes plain text to the clipboard.
     /// </summary>
-    /// <param name="text">Text to read, write, or transform.</param>
+    /// <param name="text">The text to place on the clipboard. A null value writes an empty string.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the write text operation is complete.</returns>
     ValueTask WriteText(string? text, CancellationToken cancellationToken = default);
@@ -59,7 +59,7 @@ public interface IClipboardInterop : IAsyncDisposable
     /// <summary>
     /// Writes one or more clipboard items. Each item can have multiple MIME types; use data URLs for binary (e.g. image/png).
     /// </summary>
-    /// <param name="items">items to inspect or update.</param>
+    /// <param name="items">The clipboard items to write. Text values are raw strings; binary values are data URLs.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the write operation is complete.</returns>
     ValueTask Write(IEnumerable<ClipboardItemDto> items, CancellationToken cancellationToken = default);
