@@ -44,6 +44,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.12" />
         <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="4.0.1908" />
-        <PackageReference Include="Soenneker.Gen.EnumValues" Version="4.0.52" />
+        <PackageReference Include="Soenneker.Gen.EnumValues" Version="4.0.53" />
     </ItemGroup>
 </Project>
