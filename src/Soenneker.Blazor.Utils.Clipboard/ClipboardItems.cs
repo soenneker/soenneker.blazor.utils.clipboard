@@ -17,7 +17,7 @@ public static class ClipboardItems
     {
         return new ClipboardItemDto
         {
-            Types = new Dictionary<string, string> { ["text/plain"] = plainText ?? "" }
+            Types = { ["text/plain"] = plainText ?? "" }
         };
     }
 
@@ -29,10 +29,10 @@ public static class ClipboardItems
     /// <returns>The newly created clipboard Item Dto.</returns>
     public static ClipboardItemDto CreatePlainAndHtml(string plainText, string? html = null)
     {
-        var types = new Dictionary<string, string> { ["text/plain"] = plainText ?? "" };
+        ClipboardItemDto item = CreateText(plainText);
         if (!string.IsNullOrEmpty(html))
-            types["text/html"] = html;
-        return new ClipboardItemDto { Types = types };
+            item.Types["text/html"] = html;
+        return item;
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ public static class ClipboardItems
     {
         return new ClipboardItemDto
         {
-            Types = new Dictionary<string, string> { [mimeType] = dataUrl ?? "" }
+            Types = { [mimeType] = dataUrl ?? "" }
         };
     }
 }
