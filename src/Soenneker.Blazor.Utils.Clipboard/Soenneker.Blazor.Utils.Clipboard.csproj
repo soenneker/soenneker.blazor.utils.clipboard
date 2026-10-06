@@ -46,4 +46,7 @@
         <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="4.0.1909" />
         <PackageReference Include="Soenneker.Gen.EnumValues" Version="4.0.53" />
     </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Soenneker.Blazor.Utils.Clipboard.TrimSmoke" />
+    </ItemGroup>
 </Project>

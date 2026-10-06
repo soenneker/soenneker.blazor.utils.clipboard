@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -122,7 +123,8 @@ public sealed class ClipboardInterop : IClipboardInterop
         using (source)
         {
             IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            var list = await module.InvokeAsync<List<ClipboardItemDto>>("read", linked);
+            JsonElement payload = await module.InvokeAsync<JsonElement>("read", linked);
+            var list = payload.Deserialize(InteropJsonContext.Default.ListClipboardItemDto);
 
             return list ?? [];
         }
@@ -137,7 +139,7 @@ public sealed class ClipboardInterop : IClipboardInterop
         using (source)
         {
             IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("write", linked, items);
+            await module.InvokeVoidAsync("write", linked, JsonSerializer.SerializeToElement(items, InteropJsonContext.Default.IEnumerableClipboardItemDto));
         }
     }
 
