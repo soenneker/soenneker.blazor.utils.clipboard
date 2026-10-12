@@ -43,8 +43,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.12" />
-        <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="4.0.1913" />
-        <PackageReference Include="Soenneker.Gen.EnumValues" Version="4.0.54" />
+        <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="4.0.1914" />
+        <PackageReference Include="Soenneker.Gen.EnumValues" Version="4.0.55" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Soenneker.Blazor.Utils.Clipboard.TrimSmoke" />
