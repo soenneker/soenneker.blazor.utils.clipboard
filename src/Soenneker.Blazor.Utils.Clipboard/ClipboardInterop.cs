@@ -74,10 +74,17 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            var state = await module.InvokeAsync<string>("getReadPermissionState", linked);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                var state = await module.InvokeAsync<string>("getReadPermissionState", linked);
 
-            return ParsePermissionState(state);
+                return ParsePermissionState(state);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'ClipboardInterop.GetReadPermissionState' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -87,10 +94,17 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            var state = await module.InvokeAsync<string>("getWritePermissionState", linked);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                var state = await module.InvokeAsync<string>("getWritePermissionState", linked);
 
-            return ParsePermissionState(state);
+                return ParsePermissionState(state);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'ClipboardInterop.GetWritePermissionState' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -100,8 +114,15 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            return await module.InvokeAsync<string>("readText", linked);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                return await module.InvokeAsync<string>("readText", linked);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'ClipboardInterop.ReadText' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -111,8 +132,15 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("writeText", linked, text ?? "");
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("writeText", linked, text ?? "");
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'ClipboardInterop.WriteText' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -122,11 +150,18 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            JsonElement payload = await module.InvokeAsync<JsonElement>("read", linked);
-            var list = payload.Deserialize(InteropJsonContext.Default.ListClipboardItemDto);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                JsonElement payload = await module.InvokeAsync<JsonElement>("read", linked);
+                var list = payload.Deserialize(InteropJsonContext.Default.ListClipboardItemDto);
 
-            return list ?? [];
+                return list ?? [];
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'ClipboardInterop.Read' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -138,8 +173,15 @@ public sealed class ClipboardInterop : IClipboardInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("write", linked, JsonSerializer.SerializeToElement(items, InteropJsonContext.Default.IEnumerableClipboardItemDto));
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("write", linked, JsonSerializer.SerializeToElement(items, InteropJsonContext.Default.IEnumerableClipboardItemDto));
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'ClipboardInterop.Write' failed: {exception.Message}", exception);
+            }
         }
     }
 
