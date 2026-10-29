@@ -50,4 +50,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Soenneker.Blazor.Utils.Clipboard.TrimSmoke" />
     </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Soenneker.Blazor.Extensions.IJSObjectReferences" Version="11.0.2" />
+    </ItemGroup>
 </Project>
