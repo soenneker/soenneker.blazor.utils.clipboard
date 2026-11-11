@@ -46,16 +46,16 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="11.0.0" />
-        <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="11.0.1940" />
-        <PackageReference Include="Soenneker.Gen.EnumValues" Version="11.0.65" />
+        <PackageReference Include="Soenneker.Blazor.Utils.ModuleImport" Version="11.0.1943" />
+        <PackageReference Include="Soenneker.Gen.EnumValues" Version="11.0.66" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Soenneker.Blazor.Utils.Clipboard.TrimSmoke" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Soenneker.Blazor.Extensions.IJSObjectReferences" Version="11.0.4" />
+        <PackageReference Include="Soenneker.Blazor.Extensions.IJSObjectReferences" Version="11.0.5" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Soenneker.Gen.Web.Minifier" Version="11.0.55" PrivateAssets="all" />
+        <PackageReference Include="Soenneker.Gen.Web.Minifier" Version="11.0.57" PrivateAssets="all" />
     </ItemGroup>
 </Project>
